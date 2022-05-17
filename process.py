@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import xarray as xr
 import re
 from pathlib import Path
@@ -19,8 +18,8 @@ def cmap_xmap(function, cmap):
     function_to_map = lambda x : (function(x[0]), x[1], x[2])
     for key in ('red','green','blue'):
         cdict[key] = map(function_to_map, cdict[key])
-#        cdict[key].sort()
-#        assert (cdict[key][0]<0 or cdict[key][-1]>1), "Resulting indices extend out of the [0, 1] segment."
+    #        cdict[key].sort()
+    #        assert (cdict[key][0]<0 or cdict[key][-1]>1), "Resulting indices extend out of the [0, 1] segment."
     return matplotlib.colors.LinearSegmentedColormap('colormap',cdict,1024)
 
 def getClosest(sortedMatrix, column, val):
@@ -88,7 +87,7 @@ def extractCoordinates(filename):
 
     """
     with open(filename, 'r') as file:
-#        regex = re.compile(' (?P<varName>[a-zA-Z._-]+) = (?P<varValue>[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?),?')
+        #        regex = re.compile(' (?P<varName>[a-zA-Z._-]+) = (?P<varValue>[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?),?')
         regex = r"(?P<varName>[a-zA-Z._-]+) = (?P<varValue>[^,]*),?"
         dataBegin = r"\d"
         is_float = r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?"
@@ -97,8 +96,8 @@ def extractCoordinates(filename):
             if match:
                 return {
                     var : float(value) if re.match(is_float, value)
-                        else bool(re.match(r".*?true.*?", value.lower())) if re.match(r".*?(true|false).*?", value.lower())
-                        else value
+                    else bool(re.match(r".*?true.*?", value.lower())) if re.match(r".*?(true|false).*?", value.lower())
+                    else value
                     for var, value in match
                 }
             elif re.match(dataBegin, line[0]):
@@ -187,11 +186,11 @@ if __name__ == '__main__':
     # Experiment prefixes: one per experiment (root of the file name)
     experiments = ['simulation']
     floatPrecision = '{: 0.3f}'
-    # Number of time samples 
+    # Number of time samples
     timeSamples = 100
     # time management
     minTime = 0
-    maxTime = 36000#46000
+    maxTime = 50
     timeColumnName = 'time'
     logarithmicTime = False
     # One or more variables are considered random and "flattened"
@@ -219,7 +218,7 @@ if __name__ == '__main__':
             return result
         def __str__(self):
             return f'{self.description()} {self.unit()}'
-    
+
     centrality_label = 'H_a(x)'
     def expected(x):
         return r'\mathbf{E}[' + x + ']'
@@ -229,25 +228,17 @@ if __name__ == '__main__':
         return 'MSE[' + x + ']'
     def cardinality(x):
         return r'\|' + x + r'\|'
-    (stations, busy_sum, busy_max, avg_distance, water_level, total_danger, danger1, danger2, danger3, danger4, danger5) = (
-        'station-handle', 'station-busy[sum]', 'station-busy[max]',
-        'solve[mean]', 'water-level[mean]', 'total-danger[sum]',
-        'danger-1[sum]','danger-2[sum]','danger-3[sum]',
-        'danger-4[sum]', 'danger-5[sum]',
-    )
-    labels = {
-        stations: Measure(r'alerts managed by stations'),
-        busy_sum: Measure(r"stations in action"),
-        busy_max : Measure(r"signal handled by stations"),
-        avg_distance : Measure(r"distance from signal"),
-        water_level: Measure(r"water level", "mm"),
-        total_danger : Measure(r"generated alerts", "alerts"),
-        danger1 : Measure(r"one signal", "nodes"),
-        danger2: Measure(r"two signals", "nodes"),
-        danger3: Measure(r"three signals", "nodes"),
-        danger4: Measure(r"four signals", "nodes"),
-        danger5: Measure(r"five signals", "nodes"),
 
+    labels = {
+        'nodeCount': Measure(r'$n$', 'nodes'),
+        'harmonicCentrality[Mean]': Measure(f'${expected("H(x)")}$'),
+        'meanNeighbors': Measure(f'${expected(cardinality("N"))}$', 'nodes'),
+        'speed': Measure(r'$\|\vec{v}\|$', r'$m/s$'),
+        'msqer@harmonicCentrality[Max]': Measure(r'$\max{(' + mse(centrality_label) + ')}$'),
+        'msqer@harmonicCentrality[Min]': Measure(r'$\min{(' + mse(centrality_label) + ')}$'),
+        'msqer@harmonicCentrality[Mean]': Measure(f'${expected(mse(centrality_label))}$'),
+        'msqer@harmonicCentrality[StandardDeviation]': Measure(f'${stdev_of(mse(centrality_label))}$'),
+        'org:protelis:armonicCentralityHLL[Mean]': Measure(f'${expected(centrality_label)}$'),
     }
     def derivativeOrMeasure(variable_name):
         if variable_name.endswith('dt'):
@@ -255,11 +246,9 @@ if __name__ == '__main__':
         return Measure(variable_name)
     def label_for(variable_name):
         return labels.get(variable_name, derivativeOrMeasure(variable_name)).description()
-    def labels_for(*name):
-        return map(lambda x: label_for(x), name)
     def unit_for(variable_name):
         return str(labels.get(variable_name, derivativeOrMeasure(variable_name)))
-    
+
     # Setup libraries
     np.set_printoptions(formatter={'float': floatPrecision.format})
     # Read the last time the data was processed, reprocess only if new data exists, otherwise just load
@@ -285,7 +274,7 @@ if __name__ == '__main__':
             for experiment in experiments:
                 # Collect all files for the experiment of interest
                 import fnmatch
-                allfiles = filter(lambda file: fnmatch.fnmatch(file, experiment + '_*.csv'), os.listdir(directory))
+                allfiles = filter(lambda file: fnmatch.fnmatch(file, experiment + '_*.txt'), os.listdir(directory))
                 allfiles = [directory + '/' + name for name in allfiles]
                 allfiles.sort()
                 # From the file name, extract the independent variables
@@ -328,7 +317,7 @@ if __name__ == '__main__':
                     timeline = timefun(minTime, maxTime, timeSamples)
                     # Resample
                     for file in allData:
-    #                    print(file)
+                        #                    print(file)
                         allData[file] = convert(timeColumn, timeline, allData[file])
                     # Populate the dataset
                     for file, data in allData.items():
@@ -363,11 +352,11 @@ if __name__ == '__main__':
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
-#        ax.set_ylim(0)
-#        ax.set_xlim(min(xdata), max(xdata))
+        #        ax.set_ylim(0)
+        #        ax.set_xlim(min(xdata), max(xdata))
         index = 0
         for (label, (data, error)) in ydata.items():
-#            print(f'plotting {data}\nagainst {xdata}')
+            #            print(f'plotting {data}\nagainst {xdata}')
             lines = ax.plot(xdata, data, label=label, color=colors(index / (len(ydata) - 1)) if colors else None, linewidth=linewidth)
             index += 1
             if error is not None:
@@ -415,34 +404,6 @@ if __name__ == '__main__':
     for experiment in experiments:
         current_experiment_means = means[experiment]
         current_experiment_errors = stdevs[experiment]
-        ### Custom charting
         generate_all_charts(current_experiment_means, current_experiment_errors, basedir = f'{experiment}/all')
-        means_pd = current_experiment_means.to_dataframe().rename(columns=lambda x: label_for(x))
 
-        current_experiment_errors = stdevs[experiment].to_dataframe().rename(columns=lambda x: label_for(x))
-        means_pd = means_pd.fillna(0)
-        Path(f'{output_directory}').mkdir(parents=True, exist_ok=True)
-        def normalize_color_map(cmap=plt.cm.viridis, interval=(0.3, 0.9), precision=10, name="mycmap"):
-            min_val, max_val = interval
-            colors = cmap(np.linspace(min_val, max_val, precision))
-            return matplotlib.colors.LinearSegmentedColormap.from_list(name, colors)
-
-        def ax_water_level():
-            ax = means_pd[label_for(water_level)].plot(secondary_y=True, lw=1, mark_right = False, color="k", linestyle="--", legend="water level")
-            ax.set_ylabel(unit_for("mean water level"))
-            return ax
-
-        def finalise_fig(ax, name):
-            fig = ax.figure
-            fig.tight_layout()
-            fig.savefig(f'{output_directory}/{name}.pdf')
-            plt.close(fig)
-
-        means_pd[labels_for(total_danger, stations)].plot(title="Generated alerts over time").set_ylabel("alerts")
-        finalise_fig(ax_water_level(), "danger-and-managed")
-
-        styles = ['x-','o-','*-', 'd-']
-        means_pd[labels_for(danger1, danger2, danger3, danger4)]\
-            .plot(style=styles, ms=2, lw=1, title="Alerted devices over time").set_ylabel("devices receiving signals (devices)")
-        finalise_fig(ax_water_level(), "danger-evolution")
 # Custom charting
