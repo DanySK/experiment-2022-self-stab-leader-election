@@ -1,6 +1,5 @@
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.net.URL
 
 plugins {
     application
@@ -50,14 +49,6 @@ dependencies {
     implementation("it.unibo.alchemist:alchemist-swingui:${libs.versions.alchemist.get()}")
     // Scala Deps
     implementation(libs.scala)
-    /*
-    implementation(libs.scalacsv)
-    implementation(libs.requests)
-    implementation(libs.ujson)
-    implementation(libs.upickle)
-    implementation(libs.smile)
-    implementation(libs.bundles.monocle.full)
-    */
     // Test
     testImplementation(libs.junit.core)
     testRuntimeOnly(libs.junit.engine)
