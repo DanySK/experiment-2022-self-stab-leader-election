@@ -44,7 +44,7 @@ multiJvm {
 dependencies {
     // Alchemist deps
     implementation(kotlin("stdlib-jdk8"))
-    // implementation(libs.bundles.alchemist.protelis)
+    implementation(libs.bundles.alchemist.protelis)
     implementation(libs.bundles.alchemist.scafi)
     implementation("it.unibo.alchemist:alchemist-swingui:${libs.versions.alchemist.get()}")
     // Scala Deps

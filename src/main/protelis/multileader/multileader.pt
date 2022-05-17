@@ -1,0 +1,99 @@
+module multileader:multileader
+
+import protelis:coord:spreading
+import protelis:lang:utils
+import java.lang.String.format
+import kotlin.text.StringsKt.padStart
+import kotlin.collections.ArraysKt.first
+
+def idOf(tuple) = tuple.get(0)
+def distanceOf(tuple) = tuple.get(1).get(1)
+def tieBreakerOf(tuple) = [tuple.get(1).get(0), tuple.get(0)]
+
+/**
+ * Devices compete against one another to become local leaders,
+ * resulting  in  a  random  Voronoi  partition  with  a  characteristic
+ * radius size.
+ * This implementation leverages [processes](https://doi.org/10.1016/j.engappai.2020.104081),
+ * each device tries to propagate a "bubble of influence", overlapping bubbles compete,
+ * the highest symmetryBreaker value of the competing participants is selected.
+ *
+ * @param uid  T, unique node identifier
+ * @param symmetryBreaker  V, competitivity, higher values make their node a more likely leader. Must be Comparable<V>.
+ * @param radius  num, maximum radius of the partition
+ * @param metric () -> num, neighbor distance estimator, returns a field of numbers
+ * @param distance (bool) -> num, finds the distance with the closest location where the provided input is true
+ * @return  T, the id of the local leader
+ */
+public def multiLeader(uid, symmetryBreaker, radius, metric, distance) {
+	let default = [uid, [symmetryBreaker, 0]]
+	//env.put("default", default)
+	//env.putField("metric", metric())
+    let time = (self.getCurrentTime() / 100).toString() // format("%3.3E", self.getCurrentTime())
+	share (lead, nbrLead <- default) {
+		let sources = [nbrLead]
+		// env.putField("debug", sources)
+		let distances = alignedMap(
+			sources,
+			{ candidate, breakDist ->
+				candidate == uid || foldMin(POSITIVE_INFINITY, breakDist.get(1) + metric()) < radius
+			},
+			{ candidate, breakDist ->
+				// let source = uid == candidate && idOf(lead) == uid
+				// let gradient = distance(source)
+				// env.put("distance-to-" + candidate, gradient)
+				// WORKS, but slow
+				// [gradcast(source, symmetryBreaker, gradient, identity), gradient]
+				// env.putField("zzz", breakDist)
+				// COMPLETELY BROKEN
+				// [foldMin(breakDist.get(0)), foldMin(POSITIVE_INFINITY, breakDist.get(1) + metric())]
+				// DEBUG
+				// env.putField(time + " " + candidate + " field", breakDist)
+				// env.put(time + " " + candidate + " result", [foldMin(POSITIVE_INFINITY, breakDist.get(0)), foldMin(POSITIVE_INFINITY, breakDist.get(1) + metric())])
+				// WORKS (DYNAMIC T.B.V.)
+				// mux (candidate == uid) { default } else { [foldMin(POSITIVE_INFINITY, breakDist.get(0)), foldMin(POSITIVE_INFINITY, breakDist.get(1) + metric())] }
+				// WORKS (DYNAMIC T.B.V.)
+				mux (candidate == uid) {
+					default
+				} else {
+					foldHood([candidate, POSITIVE_INFINITY], [breakDist.get(0), breakDist.get(1) + metric()]) { a, b ->
+						if (a.get(1) < b.get(1)) { a } else { b }
+					}
+				}
+				// OSCILLATORY BEHAVIOR
+				// [foldMin(POSITIVE_INFINITY, breakDist.get(0)), foldMin(POSITIVE_INFINITY, breakDist.get(1) + metric())]
+				// OSCILLATORY BEHAVIOR
+				//[gradcast(source, symmetryBreaker, gradient, identity), foldMin(POSITIVE_INFINITY, breakDist.get(1) + metric())]
+			},
+			[NEGATIVE_INFINITY, POSITIVE_INFINITY]
+		)
+		env.put("distances", distances)
+		let closeEnough = distances.filter { distanceOf(it) < radius }
+		// env.put(time + "-closeEnough", closeEnough)
+		let best = closeEnough.fold(default) { a, b ->
+			if (tieBreakerOf(a) > tieBreakerOf(b)) { a } else { b }
+		}
+		// env.put(time + "-BEST", best)
+		best
+	}.get(0)
+}
+
+public def multiLeaderWithGradient(symmetryBreaker, radius, metric) =
+    multiLeader(self.getDeviceUID().getId(), symmetryBreaker, radius, metric) { distanceToWithMetric(it, metric) }
+
+let mid = self.getDeviceUID().getId()
+let myNeighbors = foldSum(nbr(1))
+let range = nbrRange()
+multiLeaderWithGradient(
+	if (self.getCurrentTime() % 100 < 50) { myNeighbors } else { rep(x <- self.nextRandomDouble()) { x } },
+	env.get("grain")
+) {
+	// let mid = self.getDeviceUID().getId()
+	// mux(mid == nbr(mid)) { 0 } else { nbr(myNeighbors) * myNeighbors }
+	nbrRange()
+	/*
+	let diff = nbr(self.getCoordinates()) - self.getCoordinates()
+	hypot(diff.get(0), diff.get(1))
+	*/
+	// mux (env.has("layer")) { range * layerDiff } else { mux(mid == nbr(mid)) { 0 } else { 0.01 * nbr(myNeighbors) * myNeighbors } }
+}

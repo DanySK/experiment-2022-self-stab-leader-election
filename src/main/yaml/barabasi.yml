@@ -1,0 +1,22 @@
+incarnation: protelis
+
+_gradient: &gradient
+  - time-distribution: 1
+    program: multileader:multileader
+  - program: send
+
+deployments:
+  type: GraphStreamDeployment
+  parameters:
+    nodeCount: 1000
+    offsetX: 0
+    offsetY: 0
+    zoom: 0.2
+    layoutQuality: 0.5
+    createLinks: true
+    generatorName: BarabasiAlbert
+    parameters: []
+  programs: *gradient
+  contents:
+    molecule: grain
+    concentration: 5
