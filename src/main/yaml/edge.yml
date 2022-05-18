@@ -1,0 +1,90 @@
+incarnation: protelis
+
+variables:
+  nodes:
+    formula: 1000
+  serverLine: &serverLine
+    formula: 5
+  servers: &servers
+    formula: serverLine * serverLine
+  leaves: &leaves
+    formula: nodes - servers
+  arenaStart: &arenaStart
+    formula: 80
+  arenaSize: &arenaSize
+    formula: 1030
+  serverStep: &serverStep
+    formula: arenaSize / (serverLine + 2)
+  serverStart: &serverStart
+    formula: arenaStart + serverStep
+  seed: &seed
+    min: 0
+    max: 100
+    step: 1
+    default: 4
+
+seeds:
+  scenario: *seed
+  simulation: *seed
+
+environment:
+  type: ImageEnvironment
+  parameters:
+    - square.png
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: 100
+
+_leader-election: &leader-election
+  leader-election:
+    - time-distribution: 1
+      program: multileader:experiment
+    - program: send
+
+_shared-config: &shared-config
+  contents:
+    - molecule: grain
+      concentration: 250
+    - molecule: mode
+      concentration: '"id"'
+
+deployments:
+  - <<: *shared-config
+    type: Rectangle
+    parameters: [*leaves, *arenaStart, *arenaStart, *arenaSize, *arenaSize]
+    programs:
+      <<: *leader-election
+      move:
+        time-distribution: 1
+        type: Event
+        actions:
+          - type: LevyWalk
+            parameters: 2
+  - <<: *shared-config
+    type: Grid
+    parameters: [*serverStart, *serverStart, *arenaSize, *arenaSize, *serverStep, *serverStep]
+    programs:
+      <<: *leader-election
+
+terminate:
+  type: AfterTime
+  parameters: 600
+
+export:
+  type: CSVExporter
+  parameters:
+    fileNameRoot: edge
+    interval: 1
+    exportPath: data
+  data:
+    - time
+    - molecule: multileader-stability
+      aggregators: mean
+      value-filter: onlyfinite
+    - molecule: recursive-stability
+      aggregators: mean
+      value-filter: onlyfinite
+    - molecule: classic-stability
+      aggregators: mean
+      value-filter: onlyfinite

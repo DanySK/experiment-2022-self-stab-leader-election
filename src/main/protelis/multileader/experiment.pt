@@ -90,4 +90,4 @@ env.put("recursive-stability", stability(steps, recursive))
 let classic = broadcast(breakUsingUids([symmetry, mid], radius, nbrRange), mid)
 env.put("classic-stability", stability(steps, classic))
 
-classic
+multileader

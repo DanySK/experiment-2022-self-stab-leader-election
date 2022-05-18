@@ -1,0 +1,61 @@
+incarnation: protelis
+
+variables:
+  seed: &seed
+    min: 0
+    max: 100
+    step: 1
+    default: 4
+
+seeds:
+  scenario: *seed
+  simulation: *seed
+
+environment:
+  type: ImageEnvironment
+  parameters:
+    - square.png
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: 50
+
+deployments:
+  type: Rectangle
+  parameters: [1000, 80, 80, 1030, 1030]
+  programs:
+    - time-distribution: 1
+      program: multileader:experiment
+    - program: send
+    - time-distribution: 1
+      type: Event
+      actions:
+        - type: LevyWalk
+          parameters: 2
+  contents:
+    - molecule: grain
+      concentration: 400
+    - molecule: mode
+      concentration: '"random"'
+
+terminate:
+  type: AfterTime
+  parameters: 600
+
+export:
+  type: CSVExporter
+  parameters:
+    fileNameRoot: random
+    interval: 1
+    exportPath: data
+  data:
+    - time
+    - molecule: multileader-stability
+      aggregators: mean
+      value-filter: onlyfinite
+    - molecule: recursive-stability
+      aggregators: mean
+      value-filter: onlyfinite
+    - molecule: classic-stability
+      aggregators: mean
+      value-filter: onlyfinite
