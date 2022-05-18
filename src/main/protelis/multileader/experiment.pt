@@ -1,0 +1,93 @@
+module multileader:experiment
+
+import protelis:coord:spreading
+import protelis:coord:meta:timereplication
+import protelis:coord:nonselfstabilizing:accumulation
+//import protelis:coord:sparsechoice
+import protelis:lang:utils
+import protelis:state:time
+import multileader:clean
+import java.util.Collections.nCopies
+import MultiLeaderUtil.shiftAdd
+import MultiLeaderUtil.stabilityOf
+
+def degree() = foldSum(nbr(1))
+def mid() = self.getDeviceUID().getId()
+def random() = rep(x <- self.nextRandomDouble()) { x }
+
+def symmetryBreaker() {
+	let mode = env.get("mode")
+	if (mode == "cycle") {
+		let slot = self.getCurrentTime() % 300
+		if (slot < 100) {
+			degree()
+		} else {
+			if (slot < 200) {
+				mid()
+			} else {
+				random()
+			}
+		}
+	} else {
+		if (mode == "random") {
+			random()
+		} else {
+			mid()
+		}
+	}
+}
+
+def stability(steps, current) = stabilityOf(
+	rep (history <- nCopies(steps, current)) {
+		shiftAdd(history, current)
+	}
+)
+
+def globalLeader(id, symmetry) = if (isSignalStable(symmetry, 1)) { gossip([symmetry, id], max).get(1) } else { id }
+
+def recursiveS(uid, symmetry, grain) {
+	let best = globalLeader(uid, symmetry)
+	if (distanceTo(best == uid) <= grain) { best } else { recursiveS(uid, symmetry, grain) }
+}
+
+// STUFF FROM PT-LANG
+
+def default() = [POSITIVE_INFINITY, POSITIVE_INFINITY]
+
+def breakUsingUids(uid, grain, metric) = share (lead, nbrLead <- uid) {
+	distanceCompetition(distanceToWithMetric(uid == lead, metric), nbrLead, uid, grain)
+} == uid
+
+def distanceCompetition(d, nbrLead, uid, grain) =
+	mux (d > grain) {
+		uid
+	} else {
+		let thr = 0.25 * grain;
+		mux (d >= thr) {
+			default()
+		} else {
+			mux (d >= thr) {
+				default()
+			} else {
+				minHood PlusSelf(nbrLead)
+			}
+		}
+	}
+
+
+let symmetry = symmetryBreaker()
+let radius = env.get("grain")
+let mid = self.getDeviceUID().getId()
+let steps = 11
+env.put("symmetry", symmetry)
+
+let multileader = multiLeader(mid, symmetry, radius, nbrRange)
+env.put("multileader-stability", stability(steps, multileader))
+
+let recursive = recursiveS(mid, symmetry, radius)
+env.put("recursive-stability", stability(steps, recursive))
+
+let classic = broadcast(breakUsingUids([symmetry, mid], radius, nbrRange), mid)
+env.put("classic-stability", stability(steps, classic))
+
+classic

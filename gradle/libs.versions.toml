@@ -1,9 +1,9 @@
 [versions]
-alchemist = "13.0.6"
-kotlin = "1.6.21"
+alchemist = "19.0.0"
+kotlin = "1.6.10"
 junit = "5.8.2"
 protelis = "15.4.2"
-scala = "2.13.8"
+scala = "2.13.6"
 scalaMajor = "2.13"
 
 [libraries]
@@ -24,5 +24,5 @@ alchemist-scafi = [ "alchemist", "alchemist-scafi" ]
 gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "0.3.0" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "0.10.1" }
-multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "0.3.7" }
+multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "0.3.4" }
 taskTree = { id = "com.dorongold.task-tree", version = "2.1.0" }

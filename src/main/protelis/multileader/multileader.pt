@@ -29,7 +29,7 @@ public def multiLeader(uid, symmetryBreaker, radius, metric, distance) {
 	let default = [uid, [symmetryBreaker, 0]]
 	//env.put("default", default)
 	//env.putField("metric", metric())
-    let time = (self.getCurrentTime() / 100).toString() // format("%3.3E", self.getCurrentTime())
+	let time = (self.getCurrentTime() / 100).toString() // format("%3.3E", self.getCurrentTime())
 	share (lead, nbrLead <- default) {
 		let sources = [nbrLead]
 		// env.putField("debug", sources)
@@ -79,7 +79,32 @@ public def multiLeader(uid, symmetryBreaker, radius, metric, distance) {
 }
 
 public def multiLeaderWithGradient(symmetryBreaker, radius, metric) =
-    multiLeader(self.getDeviceUID().getId(), symmetryBreaker, radius, metric) { distanceToWithMetric(it, metric) }
+	multiLeader(self.getDeviceUID().getId(), symmetryBreaker, radius, metric) { distanceToWithMetric(it, metric) }
+	//multiLeaderG(self.getDeviceUID().getId(), symmetryBreaker, radius, metric)
+
+/*
+ * Process-less version not working, yet...
+ */
+public def multiLeaderG(uid, symmetryBreaker, radius, metric) {
+	let default = [uid, symmetryBreaker, 0]
+	share(received <- default) {
+		env.putField((self.getCurrentTime() + 1000).intValue() + "-0received", received)
+		let local = mux(received.get(0) == uid) { default } else { received.set(2, received.get(2) + metric()) }
+		env.putField((self.getCurrentTime() + 1000).intValue() + "-1local", local)
+		let source = noneButSelf(local.get(2) + metric() <= radius)
+			|| symmetryBreaker >= foldMax(NEGATIVE_INFINITY, local.get(1))
+		env.put((self.getCurrentTime() + 1000).intValue() + "-3source", source)
+		let result = G(source, default, metric) {
+			let filtered = mux(local.get(0) == it.get(0)) {
+				local.set(2, local.get(2) + metric())
+			} else { local.set(2, POSITIVE_INFINITY) }
+			reduceHood(filtered) { a, b -> if (a.get(2) < b.get(2)) { a } else { b } }
+				.orElse(default)
+		}
+		env.put((self.getCurrentTime() + 1000).intValue() + "-4result", result)
+		result
+	}.get(0)
+}
 
 let mid = self.getDeviceUID().getId()
 let myNeighbors = foldSum(nbr(1))

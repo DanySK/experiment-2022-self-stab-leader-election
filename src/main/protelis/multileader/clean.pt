@@ -1,0 +1,58 @@
+module multileader:clean
+
+import protelis:coord:spreading
+import protelis:lang:utils
+
+def idOf(tuple) = tuple.get(0)
+def distanceOf(tuple) = tuple.get(1).get(1)
+def tieBreakerOf(tuple) = [tuple.get(1).get(0), tuple.get(0)]
+
+/**
+ * Devices compete against one another to become local leaders,
+ * resulting  in  a  random  Voronoi  partition  with  a  characteristic
+ * radius size.
+ * This implementation leverages [processes](https://doi.org/10.1016/j.engappai.2020.104081),
+ * each device tries to propagate a "bubble of influence", overlapping bubbles compete,
+ * the highest symmetryBreaker value of the competing participants is selected.
+ *
+ * @param uid  T, unique node identifier
+ * @param symmetryBreaker  V, competitivity, higher values make their node a more likely leader. Must be Comparable<V>.
+ * @param radius  num, maximum radius of the partition
+ * @param metric () -> num, neighbor distance estimator, returns a field of numbers
+ * @return  T, the id of the local leader
+ */
+public def multiLeader(uid, symmetryBreaker, radius, metric) {
+	let localData = [symmetryBreaker, 0] // field of the local candidacy strengths
+	let default = [uid, localData] // I candidate myself
+	share (lead, nbrLead <- default) { // By default, each device is a leader
+		alignedMap(
+			[nbrLead], // consider each candidacy separately
+			{ candidate, breakDist -> // Filter out those whose leader is farther away than radius
+				candidate == uid || foldMin(POSITIVE_INFINITY, breakDist.get(1) + metric()) < radius
+			},
+			{ candidate, breakDist ->
+				mux (candidate == uid) { // When the candidate is centered in the local device
+					localData // Propose my current candidacy: it is myself.
+				} else {
+					// Otherwise, select the best candidate based on its symmetryBreaker value
+					foldHood([candidate, POSITIVE_INFINITY], [breakDist.get(0), breakDist.get(1) + metric()]) { a, b ->
+						if (a.get(1) < b.get(1)) { a } else { b }
+					}
+				}
+			},
+			[NEGATIVE_INFINITY, POSITIVE_INFINITY] // When no information is available assume the worst possible candidacy
+		).fold(default) { a, b -> // Find the one with the lowest tie breaker
+			if (tieBreakerOf(a) > tieBreakerOf(b)) { a } else { b }
+		}
+	}.get(0)
+}
+
+let mid = self.getDeviceUID().getId()
+let myNeighbors = foldSum(nbr(1))
+let range = nbrRange()
+multiLeader(
+	mid,
+	if (self.getCurrentTime() % 200 < 100) { myNeighbors } else { rep(x <- self.nextRandomDouble()) { x } },
+	env.get("grain"),
+	nbrRange
+)

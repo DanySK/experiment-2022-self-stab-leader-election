@@ -94,7 +94,7 @@
       "val": 16
     },
     "molFilter": true,
-    "molString": "multileader:multileader",
+    "molString": "multileader:experiment",
     "molPropertyFilter": true,
     "property": "\u003cvalue\u003e % 17",
     "writingPropertyValue": false,
@@ -154,7 +154,7 @@
       "val": 5
     },
     "molFilter": true,
-    "molString": "multileader:multileader",
+    "molString": "multileader:experiment",
     "molPropertyFilter": true,
     "property": "\u003cvalue\u003e \u003d\u003d self.getDeviceUID().getId()",
     "writingPropertyValue": false,
