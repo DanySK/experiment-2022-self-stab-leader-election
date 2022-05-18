@@ -1,5 +1,5 @@
 [versions]
-alchemist = "19.0.0"
+alchemist = "19.0.3"
 kotlin = "1.6.10"
 junit = "5.8.2"
 protelis = "15.4.2"
