@@ -50,6 +50,9 @@ export:
     - molecule: recursive-stability
       aggregators: mean
       value-filter: onlyfinite
+    - molecule: classic2-stability
+      aggregators: mean
+      value-filter: onlyfinite
     - molecule: classic-stability
       aggregators: mean
       value-filter: onlyfinite

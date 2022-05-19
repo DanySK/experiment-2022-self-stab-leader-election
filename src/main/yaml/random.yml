@@ -31,7 +31,9 @@ deployments:
       type: Event
       actions:
         - type: LevyWalk
-          parameters: 2
+          parameters:
+            speed: 2
+            scale: 100
   contents:
     - molecule: grain
       concentration: 400
@@ -45,7 +47,7 @@ terminate:
 export:
   type: CSVExporter
   parameters:
-    fileNameRoot: barabasi
+    fileNameRoot: random
     interval: 1
     exportPath: data
   data:
@@ -54,6 +56,9 @@ export:
       aggregators: mean
       value-filter: onlyfinite
     - molecule: recursive-stability
+      aggregators: mean
+      value-filter: onlyfinite
+    - molecule: classic2-stability
       aggregators: mean
       value-filter: onlyfinite
     - molecule: classic-stability
@@ -65,3 +70,4 @@ export:
     - molecule: share-stability
       aggregators: mean
       value-filter: onlyfinite
+
