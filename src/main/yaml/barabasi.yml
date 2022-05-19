@@ -53,3 +53,9 @@ export:
     - molecule: classic-stability
       aggregators: mean
       value-filter: onlyfinite
+    - molecule: selfstab-stability
+      aggregators: mean
+      value-filter: onlyfinite
+    - molecule: share-stability
+      aggregators: mean
+      value-filter: onlyfinite

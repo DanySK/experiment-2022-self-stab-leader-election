@@ -45,7 +45,7 @@ terminate:
 export:
   type: CSVExporter
   parameters:
-    fileNameRoot: random
+    fileNameRoot: barabasi
     interval: 1
     exportPath: data
   data:
@@ -57,5 +57,11 @@ export:
       aggregators: mean
       value-filter: onlyfinite
     - molecule: classic-stability
+      aggregators: mean
+      value-filter: onlyfinite
+    - molecule: selfstab-stability
+      aggregators: mean
+      value-filter: onlyfinite
+    - molecule: share-stability
       aggregators: mean
       value-filter: onlyfinite

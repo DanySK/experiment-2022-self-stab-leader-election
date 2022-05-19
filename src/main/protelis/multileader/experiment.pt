@@ -75,6 +75,44 @@ def distanceCompetition(d, nbrLead, uid, grain) =
 	}
 
 
+def Candidacy(symmetryBreaker, distance, leaderId) = [symmetryBreaker, distance, leaderId]
+def candidacySymmetryBreaker(candidacy) = candidacy.get(0)
+def candidacyDistance(candidacy) = candidacy.get(1)
+def candidacyLeaderId(candidacy) = candidacy.get(2)
+def worstCandidacy() = Candidacy(POSITIVE_INFINITY, POSITIVE_INFINITY, POSITIVE_INFINITY)
+def fmp(candidacy, localId, radius) =
+	mux (candidacyLeaderId(candidacy) == localId || candidacyDistance(candidacy) >= radius) {
+		worstCandidacy()
+	} else {
+		candidacy
+	}
+
+def selfstab(mid, radius, symmetryBreaker, metric) {
+	let local = Candidacy(-symmetryBreaker, 0, mid)
+	candidacyLeaderId(
+		rep (candidacy <- local) {
+			let candidacies = Candidacy(
+				nbr(candidacySymmetryBreaker(candidacy)),
+				nbr(candidacyDistance(candidacy)) + metric(),
+				nbr(candidacyLeaderId(candidacy))
+			)
+			let filtered = fmp(candidacies, mid, radius)
+			min(local, foldMin(worstCandidacy(), filtered))
+		}
+	)
+}
+
+def selfstabFaster(mid, radius, symmetryBreaker, metric) {
+	let local = Candidacy(-symmetryBreaker, 0, mid)
+	candidacyLeaderId(
+		share (received <- local) {
+			let candidacies = received.set(1, received.get(1) + metric())
+			let filtered = fmp(candidacies, mid, radius)
+			min(local, foldMin(worstCandidacy(), filtered))
+		}
+	)
+}
+
 let symmetry = symmetryBreaker()
 let radius = env.get("grain")
 let mid = self.getDeviceUID().getId()
@@ -90,4 +128,10 @@ env.put("recursive-stability", stability(steps, recursive))
 let classic = broadcast(breakUsingUids([symmetry, mid], radius, nbrRange), mid)
 env.put("classic-stability", stability(steps, classic))
 
-multileader
+let stab = selfstab(mid, radius, symmetry, nbrRange)
+env.put("selfstab-stability", stability(steps, stab))
+
+let withShare = selfstabFaster(mid, radius, symmetry, nbrRange)
+env.put("share-stability", stability(steps, withShare))
+
+withShare
