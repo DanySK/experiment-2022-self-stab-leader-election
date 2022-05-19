@@ -438,8 +438,7 @@ if __name__ == '__main__':
                 ax.barh(y = ystart, width=100, left=200+start, color='#f5fcff')
                 ax.text(x=200+start+space, y=ystart+textshift, s='rand',)
         fig.tight_layout()
-        figname = f'{experiment}.pdf'
         Path('charts').mkdir(parents=True, exist_ok=True)
-        fig.savefig(f'charts/{figname}.pdf')
+        fig.savefig(f'charts/{experiment}.pdf')
 
 # Custom charting
