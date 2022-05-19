@@ -56,7 +56,7 @@ def default() = [POSITIVE_INFINITY, POSITIVE_INFINITY]
 
 def breakUsingUids(uid, grain, metric) = share (lead, nbrLead <- uid) {
 	distanceCompetition(distanceToWithMetric(uid == lead, metric), nbrLead, uid, grain)
-} == uid
+}
 
 def distanceCompetition(d, nbrLead, uid, grain) =
 	mux (d > grain) {
@@ -119,17 +119,21 @@ let mid = self.getDeviceUID().getId()
 let steps = 11
 env.put("symmetry", symmetry)
 
-let multileader = multiLeader(mid, symmetry, radius, nbrRange)
-env.put("multileader-stability", stability(steps, multileader))
+// DISABLED FOR THESE TESTS
+// let multileader = multiLeader(mid, symmetry, radius, nbrRange)
+// env.put("multileader-stability", stability(steps, multileader))
 
 let recursive = recursiveS(mid, symmetry, radius)
 env.put("recursive-stability", stability(steps, recursive))
 
-let classic = broadcast(breakUsingUids([symmetry, mid], radius, nbrRange), mid)
+let classic2 = breakUsingUids([symmetry, mid], radius, nbrRange)
+env.put("classic2-stability", stability(steps, classic2))
+let classic = broadcast(classic2 == mid, mid)
 env.put("classic-stability", stability(steps, classic))
 
-let stab = selfstab(mid, radius, symmetry, nbrRange)
-env.put("selfstab-stability", stability(steps, stab))
+// DISABLED AS SLOW
+// let stab = selfstab(mid, radius, symmetry, nbrRange)
+// env.put("selfstab-stability", stability(steps, stab))
 
 let withShare = selfstabFaster(mid, radius, symmetry, nbrRange)
 env.put("share-stability", stability(steps, withShare))
