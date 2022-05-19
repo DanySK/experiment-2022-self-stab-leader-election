@@ -184,13 +184,13 @@ if __name__ == '__main__':
     # How to name the summary of the processed data
     pickleOutput = 'data_summary'
     # Experiment prefixes: one per experiment (root of the file name)
-    experiments = ['simulation']
-    floatPrecision = '{: 0.3f}'
+    experiments = ['random', 'edge', 'barabasi', ]
+    floatPrecision = '{: 0.6f}'
     # Number of time samples
-    timeSamples = 100
+    timeSamples = 300
     # time management
     minTime = 0
-    maxTime = 50
+    maxTime = 600
     timeColumnName = 'time'
     logarithmicTime = False
     # One or more variables are considered random and "flattened"
@@ -230,11 +230,11 @@ if __name__ == '__main__':
         return r'\|' + x + r'\|'
 
     labels = {
-        'nodeCount': Measure(r'$n$', 'nodes'),
-        'harmonicCentrality[Mean]': Measure(f'${expected("H(x)")}$'),
-        'meanNeighbors': Measure(f'${expected(cardinality("N"))}$', 'nodes'),
-        'speed': Measure(r'$\|\vec{v}\|$', r'$m/s$'),
-        'msqer@harmonicCentrality[Max]': Measure(r'$\max{(' + mse(centrality_label) + ')}$'),
+        'multileader-stability[mean]': Measure('proposed'),
+        'recursive-stability[mean]': Measure(f'recursive'),
+        'classic-stability[mean]': Measure(f'classic'),
+        'random': Measure('randomly moving'),
+        'barabasi': Measure('complex network'),
         'msqer@harmonicCentrality[Min]': Measure(r'$\min{(' + mse(centrality_label) + ')}$'),
         'msqer@harmonicCentrality[Mean]': Measure(f'${expected(mse(centrality_label))}$'),
         'msqer@harmonicCentrality[StandardDeviation]': Measure(f'${stdev_of(mse(centrality_label))}$'),
@@ -274,7 +274,7 @@ if __name__ == '__main__':
             for experiment in experiments:
                 # Collect all files for the experiment of interest
                 import fnmatch
-                allfiles = filter(lambda file: fnmatch.fnmatch(file, experiment + '_*.txt'), os.listdir(directory))
+                allfiles = filter(lambda file: fnmatch.fnmatch(file, experiment + '_*.csv'), os.listdir(directory))
                 allfiles = [directory + '/' + name for name in allfiles]
                 allfiles.sort()
                 # From the file name, extract the independent variables
@@ -404,6 +404,42 @@ if __name__ == '__main__':
     for experiment in experiments:
         current_experiment_means = means[experiment]
         current_experiment_errors = stdevs[experiment]
-        generate_all_charts(current_experiment_means, current_experiment_errors, basedir = f'{experiment}/all')
+        title = f'Instability in the {label_for(experiment)} scenario'
+        fig, ax = make_line_chart(
+            title = title,
+            xdata = current_experiment_means[timeColumnName],
+            xlabel = unit_for(timeColumnName),
+            ylabel = 'instability in the last 10 seconds',
+            ydata = {
+                label_for(algorithm): (
+                    current_experiment_means[algorithm],
+                    0,
+                    #current_experiment_errors[algorithm],
+                )
+                for algorithm in current_experiment_means.data_vars
+            },
+            colors = cmx.viridis,
+        )
+        ax.legend(loc='upper right', ncol=3)
+        ax.set_xlim(minTime, maxTime)
+        ax.set_yscale('symlog', linthresh=1e-5, subs=[1, 2, 3, 4, 5, 6, 7, 8, 9])
+        if experiment == 'barabasi':
+            ystart = -5e-6
+            ax.set_ylim(ystart, 4)
+            ax.vlines(x=range(100, 550, 100), ymin=0, ymax=0.5, color='black', linestyles=['dashed','dotted','solid'])
+            space = 30
+            textshift = 1.5e-6
+            for i in [0, 1]:
+                start = 300*i
+                ax.barh(y = ystart, width=100, left=start, color='#f8fff5')
+                ax.text(x=start+space, y=ystart+textshift, s='deg',)
+                ax.barh(y = ystart, width=100, left=100+start, color='#fff5f5')
+                ax.text(x=100+start+space, y=ystart+textshift, s='id',)
+                ax.barh(y = ystart, width=100, left=200+start, color='#f5fcff')
+                ax.text(x=200+start+space, y=ystart+textshift, s='rand',)
+        fig.tight_layout()
+        figname = f'{experiment}.pdf'
+        Path('charts').mkdir(parents=True, exist_ok=True)
+        fig.savefig(f'charts/{figname}.pdf')
 
 # Custom charting
