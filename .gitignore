@@ -6,4 +6,4 @@ build
 .idea/
 data_summary_*
 timeprocessed
-data/
+data/charts/
