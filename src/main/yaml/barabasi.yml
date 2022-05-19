@@ -3,7 +3,7 @@ incarnation: protelis
 variables:
   seed: &seed
     min: 0
-    max: 100
+    max: 199
     step: 1
     default: 4
 
