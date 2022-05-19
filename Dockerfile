@@ -1,3 +1,4 @@
+# Run with: docker build -t selfstab . && docker run -it -v:"$(pwd)"/data:/workspace/data selfstab
 FROM eclipse-temurin:17
 WORKDIR /workspace
 RUN apt-get update
