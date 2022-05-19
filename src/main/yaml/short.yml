@@ -1,0 +1,33 @@
+incarnation: protelis
+
+variables:
+  seed: &seed
+    min: 0
+    max: 0
+    step: 1
+    default: 0
+
+deployments:
+  type: GraphStreamDeployment
+  parameters:
+    nodeCount: 1000
+    offsetX: 0
+    offsetY: 0
+    zoom: 0.2
+    layoutQuality: 0.5
+    createLinks: true
+    generatorName: BarabasiAlbert
+    parameters: []
+  programs:
+    - time-distribution: 1
+      program: multileader:experiment
+    - program: send
+  contents:
+    - molecule: grain
+      concentration: 5
+    - molecule: mode
+      concentration: '"cycle"'
+
+terminate:
+  type: AfterTime
+  parameters: 0
