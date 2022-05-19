@@ -1,7 +1,13 @@
 # Self-stabilizing Leader Election
 
+![non-self-stab](s-unstable.gif)
+
+(because a non-self-stabilizing one looks like this ^ )
+
 This repository contains experiments on self-stabilizing leader electio
 developed with the [ScaFi programming language](https://scafi.github.io/) and the [Alchemist Simulator](https://github.com/AlchemistSimulator/Alchemist).
+
+
 
 ## Prerequisites
 
