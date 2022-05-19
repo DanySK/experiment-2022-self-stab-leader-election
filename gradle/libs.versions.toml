@@ -2,7 +2,6 @@
 alchemist = "19.0.3"
 kotlin = "1.6.10"
 junit = "5.8.2"
-protelis = "15.4.2"
 scala = "2.13.6"
 scalaMajor = "2.13"
 
@@ -12,12 +11,10 @@ alchemist-protelis = { module = "it.unibo.alchemist:alchemist-incarnation-protel
 alchemist-scafi = { module = "it.unibo.alchemist:alchemist-incarnation-scafi", version.ref = "alchemist" }
 junit-core = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
-protelis-interpreter = { module = "org.protelis:protelis-interpreter", version.ref = "protelis" }
-protelis-lang = { module = "org.protelis:protelis-lang", version.ref = "protelis" }
 scala = { module = "org.scala-lang:scala-library", version.ref = "scala" }
 
 [bundles]
-alchemist-protelis = [ "alchemist", "alchemist-protelis", "protelis-interpreter", "protelis-lang" ]
+alchemist-protelis = [ "alchemist", "alchemist-protelis" ]
 alchemist-scafi = [ "alchemist", "alchemist-scafi" ]
 
 [plugins]
