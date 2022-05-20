@@ -7,3 +7,5 @@ build
 data_summary_*
 timeprocessed
 data/charts/
+hs_err_pid*.log
+charts
