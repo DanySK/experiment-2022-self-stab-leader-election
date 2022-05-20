@@ -234,7 +234,7 @@ if __name__ == '__main__':
         'recursive-stability[mean]': Measure('recursive'),
         'classic-stability[mean]': Measure('classic'),
         'random': Measure('randomly moving'),
-        'barabasi': Measure('scale-free'),
+        'barabasi': Measure('scale-free network'),
         'classic2-stability[mean]': Measure('jake baseline'),
         'selfstab-stability[mean]': Measure('selfstab-rep'),
         'share-stability[mean]': Measure('proposed'),
