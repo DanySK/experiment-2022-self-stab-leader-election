@@ -60,7 +60,9 @@ deployments:
         type: Event
         actions:
           - type: LevyWalk
-            parameters: 2
+            parameters:
+              speed: 2
+              scale: 100
   - <<: *shared-config
     type: Grid
     parameters: [*serverStart, *serverStart, *arenaSize, *arenaSize, *serverStep, *serverStep]
