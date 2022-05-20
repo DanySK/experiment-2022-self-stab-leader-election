@@ -230,12 +230,14 @@ if __name__ == '__main__':
         return r'\|' + x + r'\|'
 
     labels = {
-        'multileader-stability[mean]': Measure('proposed'),
-        'recursive-stability[mean]': Measure(f'recursive'),
-        'classic-stability[mean]': Measure(f'classic'),
+        'multileader-stability[mean]': Measure('processes'),
+        'recursive-stability[mean]': Measure('recursive'),
+        'classic-stability[mean]': Measure('classic'),
         'random': Measure('randomly moving'),
-        'barabasi': Measure('complex network'),
-        'msqer@harmonicCentrality[Min]': Measure(r'$\min{(' + mse(centrality_label) + ')}$'),
+        'barabasi': Measure('scale-free'),
+        'classic2-stability[mean]': Measure('jake baseline'),
+        'selfstab-stability[mean]': Measure('selfstab-rep'),
+        'share-stability[mean]': Measure('proposed'),
         'msqer@harmonicCentrality[Mean]': Measure(f'${expected(mse(centrality_label))}$'),
         'msqer@harmonicCentrality[StandardDeviation]': Measure(f'${stdev_of(mse(centrality_label))}$'),
         'org:protelis:armonicCentralityHLL[Mean]': Measure(f'${expected(centrality_label)}$'),
@@ -417,6 +419,8 @@ if __name__ == '__main__':
                     #current_experiment_errors[algorithm],
                 )
                 for algorithm in current_experiment_means.data_vars
+                if current_experiment_means[algorithm].dropna('time', how='all').size > 1
+                if '2' not in algorithm
             },
             colors = cmx.viridis,
         )
