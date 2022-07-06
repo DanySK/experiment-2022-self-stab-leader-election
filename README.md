@@ -4,20 +4,32 @@
 
 (because a non-self-stabilizing one looks like this ^ )
 
-This repository contains experiments on self-stabilizing leader electio
-developed with the [ScaFi programming language](https://scafi.github.io/) and the [Alchemist Simulator](https://github.com/AlchemistSimulator/Alchemist).
+This repository contains experiments on self-stabilizing leader election
+developed with the
+[Protelis](http://protelis.github.io/)
+and
+[ScaFi](https://scafi.github.io/)
+programming languages
+and executed using
+the [Alchemist Simulator](https://github.com/AlchemistSimulator/Alchemist).
 
 
 
 ## Prerequisites
 
 * A working version of Java, the supported version range is 8 to 17
-* A working version of Python 3, including `pip`
+  * If you do not have Java, we recommend to install a version from [Adoptium](https://adoptium.net/)
+* A working version of Python 3.10.x or above, including `pip`
+  * If you do not have Python or are stuck with an older version, you can obtain a fresh one from [this page](https://www.python.org/downloads/)
 * A working Internet connection
 
 ## How to launch
 
-As first step, use `git` to locally clone this repository.
+As first step, use `git` to locally clone this repository:
+``https://github.com/DanySK/experiment-2022-self-stab-leader-election.git``
+
+If you do not have git, you can still [download the latest version of the code as a zip file](https://github.com/DanySK/experiment-2022-self-stab-leader-election/archive/refs/heads/master.zip).
+Unpack it, and open a terminal inside the unpacked folder
 
 To run the example you can rely on the pre-configured [Gradle](https://gradle.org) build script.
 It will automatically download all the required libraries, set up the environment, and execute the simulator via command line for you.
