@@ -56,7 +56,7 @@ They will get cached in the user's home folder (as per Gradle normal behavior).
 ## Re-generating all the data
 
 The experiment is entirely reproducible.
-Regenerating all the data may take `TIME` on a well-equipped 2022 personal computer.
+Regenerating all the data may take a long time on a well-equipped 2022 personal computer.
 The process is CPU-intensive and we do not recommend running it on devices where heat can be damaging to the battery.
 
 In order to re-run all the experiments, launch:
