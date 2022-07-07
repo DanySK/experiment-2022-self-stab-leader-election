@@ -1,3 +1,20 @@
+#### Note for impatients
+
+Just want to see it running? Fire up a terminal, then:
+* Linux/MacOS
+```
+curl https://raw.githubusercontent.com/DanySK/experiment-2022-self-stab-leader-election/master/quicklaunch.sh | sh 
+```
+* Windows/Powershell
+```powershell
+curl https://raw.githubusercontent.com/DanySK/experiment-2022-self-stab-leader-election/master/quicklaunch.ps1 | Select-Object -ExpandProperty Content | powershell.exe
+```
+
+Press <kbd>L</kbd> to visualize the links,
+then press <kbd>P</kbd> to start the simulation.
+Right click and drag to move around.
+Use the mouse wheel to zoom in/out.
+
 # Self-stabilizing Leader Election
 
 ![non-self-stab](s-unstable.gif)
@@ -13,7 +30,7 @@ programming languages
 and executed using
 the [Alchemist Simulator](https://github.com/AlchemistSimulator/Alchemist).
 
-
+Every release in the repository is archived on Zenodo: [![DOI](https://zenodo.org/badge/492755314.svg)](https://zenodo.org/badge/latestdoi/492755314)
 
 ## Prerequisites
 
@@ -40,11 +57,11 @@ For each YAML file in `src/main/yaml` a task `runFileName` will be created.
 
 In order to launch, open a terminal and move to the project root folder, then on UNIX:
 ```bash
-./gradlew runSimulationGraphic
+./gradlew runBarabasiGraphic
 ```
 On Windows:
 ```
-gradlew.bat runSimulationGraphic
+gradlew runBarabasiGraphic
 ```
 
 Press <kb>P</kb> to start the simulation.
@@ -52,6 +69,25 @@ For further information about the GUI, see the [graphical interface shortcuts](h
 
 Note that the first launch will require some time, since Gradle will download all the required files.
 They will get cached in the user's home folder (as per Gradle normal behavior).
+
+### Bundled experiments
+
+The following experiments are bundled:
+
+#### `runBarabasiGraphic`
+runs the leader election process in a Barabasi-Albert topology
+![barabasi](https://user-images.githubusercontent.com/1991673/177822849-8d092b0f-dafb-4fcc-a047-aca4cdeff420.gif)
+
+#### `runRandomGraphic`
+![random](https://user-images.githubusercontent.com/1991673/177827428-c82def59-8e7b-4c1c-88a8-25c6df4143d3.gif)
+runs the leader election process in a random network with mobile devices
+
+#### `runEdgeGraphic`
+![edge](https://user-images.githubusercontent.com/1991673/177826459-676a5f2b-cb34-42e9-9af8-15a27ef82194.gif)
+runs the leader election process in a random network with some static edge servers.
+
+All the experiments can be executed in batch mode (for generating data in parallel)
+by replacing `Graphic` with `Batch`.
 
 ## Re-generating all the data
 
@@ -61,9 +97,15 @@ The process is CPU-intensive and we do not recommend running it on devices where
 
 In order to re-run all the experiments, launch:
 ```bash
-./gradlew runSimulationBatch
+./gradlew runBarabasiBatch runRandomBatch runEdgeBatch
 ```
 data will be generated into the `data` folder
+
+**Note**: re-running the whole batch makes sense if:
+1. you need to prove that the results are exactly reproducible, or
+2. you made changes and want to re-run the whole experiment.
+
+Otherwise, it is recommended to leverage the data that we attached to the repository.
 
 ## Re-generating the charts from the paper
 
@@ -76,3 +118,6 @@ pip install -r requirements.txt --user
 mkdir -p charts
 python process.py
 ```
+
+**Note**: there is no need to re-run all the simulations if the goal is to reproduce the charts of the paper.
+We do track the result of our execution, which can be reused for the data analysis.

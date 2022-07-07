@@ -8,7 +8,8 @@ ADD gradle gradle
 ADD gradlew .
 ADD *.kts ./
 ADD util/* util/
-RUN ./gradlew runShortBatch
+RUN ./gradlew runShortBatch --parallel
 RUN ./gradlew --stop
-ENTRYPOINT ["bash"]
-CMD [ "gradlew", "runBarabasiBatch", "runRandomBatch", "runEdgeBatch", "--parallel" ]
+RUN apt-get -yq install libfontconfig1 libxrender1 libxtst6 libxi6
+ENTRYPOINT ["/workspace/gradlew"]
+CMD [ "runBarabasiGraphic", "--parallel" ]
