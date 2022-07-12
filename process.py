@@ -230,6 +230,7 @@ if __name__ == '__main__':
         return r'\|' + x + r'\|'
 
     labels = {
+        'time' : Measure('time (s)'),
         'multileader-stability[mean]': Measure('processes'),
         'recursive-stability[mean]': Measure('recursive'),
         'classic-stability[mean]': Measure('classic'),
