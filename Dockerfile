@@ -1,5 +1,5 @@
 # Run with: docker build -t selfstab . && docker run --rm -it -v:"$(pwd)"/data:/workspace/data selfstab
-FROM eclipse-temurin:18
+FROM eclipse-temurin:19
 WORKDIR /workspace
 RUN apt-get update
 RUN apt-get -yq install git
